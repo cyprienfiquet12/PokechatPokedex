@@ -65,10 +65,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [supabase.auth, fetchAppUser]);
 
   const signInWithTwitch = useCallback(async () => {
+    const base =
+      (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_APP_URL) ||
+      (typeof window !== 'undefined' && window.location.origin) ||
+      '';
+    const redirectTo = `${base.replace(/\/$/, '')}/auth/callback?next=/equipe`;
     await supabase.auth.signInWithOAuth({
       provider: 'twitch',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=/equipe`,
+        redirectTo,
         scopes: 'user:read:email',
       },
     });

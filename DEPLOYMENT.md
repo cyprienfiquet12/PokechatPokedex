@@ -15,8 +15,9 @@ En production, définir les variables suivantes (jamais commiter `.env.local` ou
 | `NEXT_PUBLIC_SUPABASE_URL` | URL du projet Supabase | `https://xxx.supabase.co` |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Clé anon (publique) Supabase | `eyJhbGc...` |
 | `SUPABASE_SERVICE_ROLE_KEY` | Clé service_role (secrète, côté serveur uniquement) | `eyJhbGc...` |
+| `NEXT_PUBLIC_APP_URL` | **Recommandé en prod** : URL publique du site (sans slash final). Évite que le callback Twitch redirige vers localhost. | `https://ton-domaine.com` |
 
-En **production**, si une variable manque, l’app lèvera une erreur au démarrage ou à la première requête API.
+En **production**, si une variable manque, l’app lèvera une erreur au démarrage ou à la première requête API. Sans `NEXT_PUBLIC_APP_URL`, la redirection après connexion peut pointer vers localhost (notamment derrière un proxy).
 
 Référence : `.env.local.example`.
 
@@ -41,7 +42,7 @@ npm run start
 ## Déploiement sur Vercel
 
 1. Importer le dépôt (GitHub/GitLab).
-2. **Environment Variables** : ajouter les 3 variables Supabase.
+2. **Environment Variables** : ajouter les 3 variables Supabase + `NEXT_PUBLIC_APP_URL` = l’URL du déploiement (ex. `https://xxx.vercel.app`).
 3. **Build Command** : `npm run build` (défaut).
 4. **Output** : Next.js (défaut).
 5. Après déploiement, mettre à jour l’URL de redirection Twitch avec l’URL réelle (ex. `https://xxx.vercel.app/auth/callback`).
@@ -54,7 +55,7 @@ npm run start
 
 ## Checklist avant mise en production
 
-- [ ] Variables d’environnement renseignées sur la plateforme / le serveur
+- [ ] Variables d’environnement renseignées (dont `NEXT_PUBLIC_APP_URL` = URL de prod pour le callback auth)
 - [ ] Redirect URI Twitch mise à jour avec l’URL de prod (`https://.../auth/callback`)
 - [ ] Supabase : provider Twitch configuré avec le même Client ID / Secret
 - [ ] `npm run build` exécuté sans erreur
