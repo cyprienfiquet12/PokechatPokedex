@@ -18,11 +18,17 @@ const PUBLIC_ITEM_IMAGES: Record<string, string> = {
   master: '/Masterball.png',
 };
 
+const ACCENT_MAP: Record<string, string> = {
+  'é': 'e', 'è': 'e', 'ê': 'e', 'ë': 'e', 'à': 'a', 'â': 'a', 'ä': 'a',
+  'ù': 'u', 'û': 'u', 'ü': 'u', 'ô': 'o', 'ö': 'o', 'î': 'i', 'ï': 'i', 'ç': 'c',
+};
+
 function normalizeName(name: string): string {
   return name
     .toLowerCase()
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
+    .split('')
+    .map((c) => ACCENT_MAP[c] ?? c)
+    .join('')
     .trim();
 }
 
