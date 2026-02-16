@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Palette Pokémon moderne */
+  --bg-dark: #0f172a;
+  --bg-card: #1e293b;
+  --bg-panel: #334155;
+  --pokemon-red: #ef4444;
+  --pokemon-red-dark: #b91c1c;
+  --pokemon-blue: #3b82f6;
+  --pokemon-blue-dark: #1d4ed8;
+  --pokemon-cream: #fef9c3;
+  --pokemon-cream-dim: #fef08a;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border-subtle: rgba(248, 250, 252, 0.08);
+  --border-accent: rgba(239, 68, 68, 0.4);
+  --shadow-glow: 0 0 24px -4px rgba(59, 130, 246, 0.15);
+  --shadow-card: 0 4px 20px -4px rgba(0, 0, 0, 0.35);
+}
+
+body {
+  color: var(--text-primary);
+  background: var(--bg-dark);
+  font-family: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Fond subtil type écran / interface */
+.bg-pokemon {
+  background-color: var(--bg-dark);
+  background-image:
+    radial-gradient(ellipse 120% 80% at 50% -20%, rgba(59, 130, 246, 0.08), transparent),
+    radial-gradient(ellipse 80% 50% at 80% 50%, rgba(239, 68, 68, 0.04), transparent);
+  min-height: 100vh;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Cartes style interface Pokédex */
+.card-pokemon {
+  background: linear-gradient(145deg, var(--bg-card) 0%, #172033 100%);
+  border: 1px solid var(--border-subtle);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-card);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.card-pokemon:hover {
+  border-color: var(--border-accent);
+  box-shadow: var(--shadow-card), var(--shadow-glow);
+}
+
+/* Badges de type (style jeu) */
+.badge-type {
+  @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold;
+}
+
+/* Rareté avec reflet */
+.rarity-COMMON { color: #94a3b8; }
+.rarity-RARE { color: #60a5fa; text-shadow: 0 0 12px rgba(96, 165, 250, 0.4); }
+.rarity-EPIC { color: #a78bfa; text-shadow: 0 0 12px rgba(167, 139, 250, 0.4); }
+.rarity-LEGENDARY { color: #fbbf24; text-shadow: 0 0 14px rgba(251, 191, 36, 0.5); }
+
+/* Bouton principal style Pokéball */
+.btn-primary {
+  @apply rounded-xl bg-[var(--pokemon-red)] px-5 py-2.5 font-semibold text-white shadow-lg transition;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
+}
+.btn-primary:hover {
+  background: var(--pokemon-red-dark);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
+  transform: translateY(-1px);
+}
