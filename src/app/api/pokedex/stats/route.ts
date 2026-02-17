@@ -1,6 +1,9 @@
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
+import { NO_CACHE_HEADERS } from '@/lib/apiCache';
+
+export const dynamic = 'force-dynamic';
 
 /**
  * GET /api/pokedex/stats
@@ -19,7 +22,7 @@ export async function GET() {
     .select('*', { count: 'exact', head: true });
 
   if (totalError) {
-    return NextResponse.json({ error: totalError.message }, { status: 500 });
+    return NextResponse.json({ error: totalError.message }, { status: 500, headers: NO_CACHE_HEADERS });
   }
 
   let captured = 0;
@@ -39,8 +42,8 @@ export async function GET() {
     }
   }
 
-  return NextResponse.json({
-    total: total ?? 0,
-    captured,
-  });
+  return NextResponse.json(
+    { total: total ?? 0, captured },
+    { headers: NO_CACHE_HEADERS }
+  );
 }

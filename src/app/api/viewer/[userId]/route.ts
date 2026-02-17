@@ -1,5 +1,8 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
+import { NO_CACHE_HEADERS } from '@/lib/apiCache';
+
+export const dynamic = 'force-dynamic';
 
 /**
  * GET /api/viewer/[userId]
@@ -12,7 +15,7 @@ export async function GET(
   const { userId } = await context.params;
   const uid = parseInt(userId, 10);
   if (Number.isNaN(uid)) {
-    return NextResponse.json({ error: 'Invalid user id' }, { status: 400 });
+    return NextResponse.json({ error: 'Invalid user id' }, { status: 400, headers: NO_CACHE_HEADERS });
   }
 
   const admin = createAdminClient();
@@ -24,7 +27,7 @@ export async function GET(
     .single();
 
   if (userError || !user) {
-    return NextResponse.json({ error: 'Viewer introuvable' }, { status: 404 });
+    return NextResponse.json({ error: 'Viewer introuvable' }, { status: 404, headers: NO_CACHE_HEADERS });
   }
 
   const [teamRes, badgesRes, inventoryRes] = await Promise.all([
@@ -50,14 +53,17 @@ export async function GET(
       .gt('quantity', 0),
   ]);
 
-  return NextResponse.json({
-    user: {
-      id: user.id,
-      username: user.username,
-      poke_coins: user.poke_coins,
+  return NextResponse.json(
+    {
+      user: {
+        id: user.id,
+        username: user.username,
+        poke_coins: user.poke_coins,
+      },
+      team: teamRes.data ?? [],
+      badges: badgesRes.data ?? [],
+      inventory: inventoryRes.data ?? [],
     },
-    team: teamRes.data ?? [],
-    badges: badgesRes.data ?? [],
-    inventory: inventoryRes.data ?? [],
-  });
+    { headers: NO_CACHE_HEADERS }
+  );
 }

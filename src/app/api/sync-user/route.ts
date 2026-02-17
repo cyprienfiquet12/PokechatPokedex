@@ -1,6 +1,9 @@
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
+import { NO_CACHE_HEADERS } from '@/lib/apiCache';
+
+export const dynamic = 'force-dynamic';
 
 /**
  * Après login Twitch, synchronise auth.users avec public.users.
@@ -14,7 +17,7 @@ export async function GET() {
   } = await supabase.auth.getUser();
 
   if (authError || !user) {
-    return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
+    return NextResponse.json({ error: 'Non authentifié' }, { status: 401, headers: NO_CACHE_HEADERS });
   }
 
   const providerId = user.user_metadata?.provider_id ?? user.user_metadata?.sub;
@@ -32,7 +35,7 @@ export async function GET() {
   if (!providerId) {
     return NextResponse.json(
       { error: 'Provider Twitch non reconnu' },
-      { status: 400 }
+      { status: 400, headers: NO_CACHE_HEADERS }
     );
   }
 
@@ -49,16 +52,19 @@ export async function GET() {
       .from('users')
       .update({ username, updated_at: new Date().toISOString() })
       .eq('id', existing.id);
-    return NextResponse.json({
-      appUser: {
-        id: existing.id,
-        username,
-        display_name,
-        xp: existing.xp,
-        level: existing.level,
-        poke_coins: existing.poke_coins,
+    return NextResponse.json(
+      {
+        appUser: {
+          id: existing.id,
+          username,
+          display_name,
+          xp: existing.xp,
+          level: existing.level,
+          poke_coins: existing.poke_coins,
+        },
       },
-    });
+      { headers: NO_CACHE_HEADERS }
+    );
   }
 
   const { data: inserted, error: insertError } = await admin
@@ -74,18 +80,21 @@ export async function GET() {
     console.error('sync-user insert error', insertError);
     return NextResponse.json(
       { error: 'Erreur lors de la création du profil' },
-      { status: 500 }
+      { status: 500, headers: NO_CACHE_HEADERS }
     );
   }
 
-  return NextResponse.json({
-    appUser: {
-      id: inserted.id,
-      username: inserted.username,
-      display_name,
-      xp: inserted.xp,
-      level: inserted.level,
-      poke_coins: inserted.poke_coins,
+  return NextResponse.json(
+    {
+      appUser: {
+        id: inserted.id,
+        username: inserted.username,
+        display_name,
+        xp: inserted.xp,
+        level: inserted.level,
+        poke_coins: inserted.poke_coins,
+      },
     },
-  });
+    { headers: NO_CACHE_HEADERS }
+  );
 }

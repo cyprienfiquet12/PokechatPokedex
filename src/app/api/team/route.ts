@@ -1,6 +1,9 @@
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
+import { NO_CACHE_HEADERS } from '@/lib/apiCache';
+
+export const dynamic = 'force-dynamic';
 
 /**
  * GET /api/team -> liste de tous les Pokémon du joueur (table user_pokemons = l'équipe).
@@ -12,12 +15,12 @@ export async function GET() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
+    return NextResponse.json({ error: 'Non authentifié' }, { status: 401, headers: NO_CACHE_HEADERS });
   }
 
   const providerId = user.user_metadata?.provider_id ?? user.user_metadata?.sub;
   if (!providerId) {
-    return NextResponse.json({ error: 'Profil Twitch introuvable' }, { status: 400 });
+    return NextResponse.json({ error: 'Profil Twitch introuvable' }, { status: 400, headers: NO_CACHE_HEADERS });
   }
 
   const admin = createAdminClient();
@@ -27,7 +30,7 @@ export async function GET() {
     .eq('twitch_id', String(providerId))
     .single();
   if (!appUser) {
-    return NextResponse.json({ error: 'Utilisateur non synchronisé' }, { status: 404 });
+    return NextResponse.json({ error: 'Utilisateur non synchronisé' }, { status: 404, headers: NO_CACHE_HEADERS });
   }
 
   const { data: team, error } = await admin
@@ -42,8 +45,8 @@ export async function GET() {
     .order('captured_at', { ascending: false });
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500, headers: NO_CACHE_HEADERS });
   }
 
-  return NextResponse.json({ team: team ?? [] });
+  return NextResponse.json({ team: team ?? [] }, { headers: NO_CACHE_HEADERS });
 }

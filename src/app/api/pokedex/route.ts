@@ -1,6 +1,9 @@
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
+import { NO_CACHE_HEADERS } from '@/lib/apiCache';
+
+export const dynamic = 'force-dynamic';
 
 /**
  * GET /api/pokedex
@@ -37,7 +40,7 @@ export async function GET(request: Request) {
     .range(offset, offset + limit - 1);
 
   if (pokemonError) {
-    return NextResponse.json({ error: pokemonError.message }, { status: 500 });
+    return NextResponse.json({ error: pokemonError.message }, { status: 500, headers: NO_CACHE_HEADERS });
   }
 
   const capturedMap: Record<number, string | null> = {};
@@ -59,5 +62,5 @@ export async function GET(request: Request) {
     first_captured_at: capturedMap[p.id] ?? null,
   }));
 
-  return NextResponse.json({ pokemons: list, total: list.length });
+  return NextResponse.json({ pokemons: list, total: list.length }, { headers: NO_CACHE_HEADERS });
 }

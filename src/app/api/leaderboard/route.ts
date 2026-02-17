@@ -1,5 +1,8 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
+import { NO_CACHE_HEADERS } from '@/lib/apiCache';
+
+export const dynamic = 'force-dynamic';
 
 /**
  * GET /api/leaderboard
@@ -13,7 +16,7 @@ export async function GET() {
     .select('user_id');
 
   if (countError) {
-    return NextResponse.json({ error: countError.message }, { status: 500 });
+    return NextResponse.json({ error: countError.message }, { status: 500, headers: NO_CACHE_HEADERS });
   }
 
   const countByUser: Record<number, number> = {};
@@ -23,7 +26,7 @@ export async function GET() {
 
   const userIds = Object.keys(countByUser).map(Number).filter((id) => countByUser[id] > 0);
   if (userIds.length === 0) {
-    return NextResponse.json({ leaderboard: [] });
+    return NextResponse.json({ leaderboard: [] }, { headers: NO_CACHE_HEADERS });
   }
 
   const { data: users, error: usersError } = await admin
@@ -32,7 +35,7 @@ export async function GET() {
     .in('id', userIds);
 
   if (usersError) {
-    return NextResponse.json({ error: usersError.message }, { status: 500 });
+    return NextResponse.json({ error: usersError.message }, { status: 500, headers: NO_CACHE_HEADERS });
   }
 
   const leaderboard = (users ?? [])
@@ -47,5 +50,5 @@ export async function GET() {
     .sort((a, b) => b.captured_count - a.captured_count)
     .map((row, index) => ({ ...row, rank: index + 1 }));
 
-  return NextResponse.json({ leaderboard });
+  return NextResponse.json({ leaderboard }, { headers: NO_CACHE_HEADERS });
 }

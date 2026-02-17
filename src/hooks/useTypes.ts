@@ -9,7 +9,7 @@ export function useTypes() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/types')
+    fetch('/api/types', { cache: 'no-store' })
       .then((res) => res.json())
       .then((data) => setTypes(data.types ?? []))
       .catch(() => setTypes([]))
