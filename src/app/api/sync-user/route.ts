@@ -24,6 +24,10 @@ export async function GET() {
     user.user_metadata?.name ??
     user.email?.split('@')[0] ??
     `user_${providerId}`;
+  const display_name =
+    user.user_metadata?.full_name ??
+    user.user_metadata?.name ??
+    username;
 
   if (!providerId) {
     return NextResponse.json(
@@ -49,6 +53,7 @@ export async function GET() {
       appUser: {
         id: existing.id,
         username,
+        display_name,
         xp: existing.xp,
         level: existing.level,
         poke_coins: existing.poke_coins,
@@ -77,6 +82,7 @@ export async function GET() {
     appUser: {
       id: inserted.id,
       username: inserted.username,
+      display_name,
       xp: inserted.xp,
       level: inserted.level,
       poke_coins: inserted.poke_coins,

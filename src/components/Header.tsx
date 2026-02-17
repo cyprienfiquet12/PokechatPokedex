@@ -59,8 +59,8 @@ export function Header() {
           ) : appUser ? (
             <div className="ml-3 flex items-center gap-2">
               <span className="rounded-lg bg-slate-700/60 px-3 py-1.5 text-sm text-slate-200">
-                {appUser.username}
-                <span className="ml-1.5 text-pokemon-cream-dim">Lv.{appUser.level}</span>
+                {appUser.display_name ??
+                  (appUser.username.charAt(0).toUpperCase() + appUser.username.slice(1).toLowerCase())}
               </span>
               <button
                 type="button"

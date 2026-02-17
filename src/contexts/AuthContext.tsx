@@ -7,6 +7,7 @@ import type { User } from '@supabase/supabase-js';
 export interface AppUser {
   id: number;
   username: string;
+  display_name?: string;
   xp: number;
   level: number;
   poke_coins: number;
