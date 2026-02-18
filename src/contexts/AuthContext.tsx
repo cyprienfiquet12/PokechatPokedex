@@ -31,7 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const supabase = createClient();
 
   const fetchAppUser = useCallback(async () => {
-    const res = await fetch('/api/sync-user');
+    const res = await fetch('/api/sync-user', { cache: 'no-store' });
     if (res.ok) {
       const data = await res.json();
       setAppUser(data.appUser);

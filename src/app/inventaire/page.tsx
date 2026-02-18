@@ -32,7 +32,7 @@ export default function InventairePage() {
       return;
     }
     setLoading(true);
-    fetch('/api/inventory')
+    fetch('/api/inventory', { cache: 'no-store' })
       .then((res) => res.json())
       .then((data) => setInventory(data.inventory ?? []))
       .catch(() => setInventory([]))

@@ -37,9 +37,9 @@ export default function EquipePage() {
     setError(null);
     try {
       const [teamRes, capturedRes, badgesRes] = await Promise.all([
-        fetch('/api/team'),
-        fetch('/api/team/captured'),
-        fetch('/api/badges'),
+        fetch('/api/team', { cache: 'no-store' }),
+        fetch('/api/team/captured', { cache: 'no-store' }),
+        fetch('/api/badges', { cache: 'no-store' }),
       ]);
       if (!teamRes.ok) {
         const d = await teamRes.json().catch(() => ({}));

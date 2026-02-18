@@ -5,7 +5,8 @@ import { NextResponse } from 'next/server';
 /**
  * POST /api/team/replace
  * Body: { userPokemonId: number, newPokemonId: number }
- * Remplace le Pokémon en équipe par l'espèce capturée : met à jour pokemon_id, level=1, xp=0, current_hp=base_hp du nouveau, is_ko=false.
+ * Échange le Pokémon en équipe avec l'espèce capturée : le Pokémon remplacé quitte l'équipe
+ * (redevient disponible dans les choix) et une nouvelle instance du Pokémon choisi rejoint l'équipe.
  */
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -53,21 +54,45 @@ export async function POST(request: Request) {
   }
 
   const baseHp = newPokemon.base_hp ?? 50;
+  const now = new Date().toISOString();
 
-  const { error } = await admin
+  // Vérifier que le slot appartient bien à l'utilisateur
+  const { data: oldSlot, error: fetchError } = await admin
     .from('user_pokemons')
-    .update({
-      pokemon_id: newPokemonId,
-      level: 1,
-      xp: 0,
-      current_hp: baseHp,
-      is_ko: false,
-    })
+    .select('id')
+    .eq('id', userPokemonId)
+    .eq('user_id', appUser.id)
+    .single();
+
+  if (fetchError || !oldSlot) {
+    return NextResponse.json({ error: 'Slot équipe introuvable' }, { status: 404 });
+  }
+
+  // 1. Insérer la nouvelle instance du Pokémon choisi dans l'équipe
+  const { error: insertError } = await admin.from('user_pokemons').insert({
+    user_id: appUser.id,
+    pokemon_id: newPokemonId,
+    level: 1,
+    xp: 0,
+    current_hp: baseHp,
+    is_shiny: false,
+    captured_at: now,
+    is_ko: false,
+  });
+
+  if (insertError) {
+    return NextResponse.json({ error: insertError.message }, { status: 500 });
+  }
+
+  // 2. Retirer l'ancien Pokémon du slot (il redevient disponible dans "Choix possibles" via user_pokedex)
+  const { error: deleteError } = await admin
+    .from('user_pokemons')
+    .delete()
     .eq('id', userPokemonId)
     .eq('user_id', appUser.id);
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  if (deleteError) {
+    return NextResponse.json({ error: deleteError.message }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });

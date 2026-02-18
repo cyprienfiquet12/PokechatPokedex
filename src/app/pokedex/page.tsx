@@ -30,7 +30,7 @@ export default function PokedexPage() {
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    fetch('/api/pokedex/stats')
+    fetch('/api/pokedex/stats', { cache: 'no-store' })
       .then((res) => res.json())
       .then((data) => setStats({ total: data.total ?? 0, captured: data.captured ?? 0 }))
       .catch(() => setStats(null));
@@ -45,7 +45,8 @@ export default function PokedexPage() {
     }
     try {
       const res = await fetch(
-        `/api/pokedex?limit=${PAGE_SIZE}&offset=${offset}`
+        `/api/pokedex?limit=${PAGE_SIZE}&offset=${offset}`,
+        { cache: 'no-store' }
       );
       const data = await res.json();
       const list = data.pokemons ?? [];

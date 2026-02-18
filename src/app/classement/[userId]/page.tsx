@@ -78,7 +78,7 @@ export default function ViewerProfilePage() {
     }
     setLoading(true);
     setError(null);
-    fetch(`/api/viewer/${userId}`)
+    fetch(`/api/viewer/${userId}`, { cache: 'no-store' })
       .then((res) => {
         if (!res.ok) {
           if (res.status === 404) throw new Error('Viewer introuvable');
