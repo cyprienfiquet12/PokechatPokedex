@@ -1,3 +1,4 @@
+import { unstable_noStore } from 'next/cache';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
 import { NO_CACHE_HEADERS } from '@/lib/apiCache';
@@ -9,6 +10,8 @@ export const dynamic = 'force-dynamic';
  * Classement des viewers par nombre de Pokémon capturés (espèces distinctes dans user_pokedex).
  */
 export async function GET() {
+  unstable_noStore();
+
   const admin = createAdminClient();
 
   const { data: rows, error: countError } = await admin
@@ -50,5 +53,13 @@ export async function GET() {
     .sort((a, b) => b.captured_count - a.captured_count)
     .map((row, index) => ({ ...row, rank: index + 1 }));
 
-  return NextResponse.json({ leaderboard }, { headers: NO_CACHE_HEADERS });
+  return NextResponse.json(
+    { leaderboard },
+    {
+      headers: {
+        ...NO_CACHE_HEADERS,
+        'X-Response-Time': String(Date.now()),
+      },
+    }
+  );
 }

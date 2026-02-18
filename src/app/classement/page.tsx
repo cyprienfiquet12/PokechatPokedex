@@ -18,6 +18,7 @@ function fetchLeaderboard() {
   const url = `/api/leaderboard?_t=${Date.now()}`;
   return fetch(url, {
     cache: 'no-store',
+    credentials: 'omit',
     headers: { 'Cache-Control': 'no-cache', Pragma: 'no-cache' },
   })
     .then((res) => res.json())
@@ -52,8 +53,8 @@ export default function ClassementPage() {
     return () => document.removeEventListener('visibilitychange', onVisibilityChange);
   }, [refresh]);
 
-  // Rafraîchissement automatique toutes les minutes (en arrière-plan, sans spinner)
-  const POLL_INTERVAL_MS = 60 * 1000;
+  // Rafraîchissement automatique toutes les 30 s (compte de captures à jour)
+  const POLL_INTERVAL_MS = 30 * 1000;
   useEffect(() => {
     const interval = setInterval(() => refresh(true), POLL_INTERVAL_MS);
     return () => clearInterval(interval);
