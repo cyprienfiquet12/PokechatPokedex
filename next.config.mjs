@@ -14,6 +14,19 @@ const nextConfig = {
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
         ],
       },
+      // Désactiver le cache edge pour le classement et son API (données live)
+      {
+        source: '/classement/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'no-store, no-cache, max-age=0, must-revalidate' },
+        ],
+      },
+      {
+        source: '/api/leaderboard',
+        headers: [
+          { key: 'Cache-Control', value: 'no-store, no-cache, max-age=0, must-revalidate, private' },
+        ],
+      },
     ];
   },
 };

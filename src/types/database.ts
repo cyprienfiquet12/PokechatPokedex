@@ -57,6 +57,10 @@ export interface UserPokedexEntry {
   user_id: number;
   pokemon_id: number;
   first_captured_at: string;
+  /** Niveau conservé quand le Pokémon quitte l'équipe (pour le restaurer au prochain ajout). */
+  lvl?: number | null;
+  /** XP conservée avec le niveau. */
+  xp?: number | null;
 }
 
 export interface UserInventoryItem {

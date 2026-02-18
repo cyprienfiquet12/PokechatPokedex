@@ -21,7 +21,12 @@ export default function ClassementPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/leaderboard', { cache: 'no-store' })
+    // Cache-busting pour forcer une requête fraîche (Vercel, CDN, navigateur)
+    const url = `/api/leaderboard?_t=${Date.now()}`;
+    fetch(url, {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache', Pragma: 'no-cache' },
+    })
       .then((res) => res.json())
       .then((data) => setLeaderboard(data.leaderboard ?? []))
       .catch(() => setLeaderboard([]))
