@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -14,33 +14,61 @@ interface LeaderboardEntry {
   captured_count: number;
 }
 
+function fetchLeaderboard() {
+  const url = `/api/leaderboard?_t=${Date.now()}`;
+  return fetch(url, {
+    cache: 'no-store',
+    headers: { 'Cache-Control': 'no-cache', Pragma: 'no-cache' },
+  })
+    .then((res) => res.json())
+    .then((data) => (data.leaderboard ?? []) as LeaderboardEntry[]);
+}
+
 export default function ClassementPage() {
   const router = useRouter();
   const { appUser } = useAuth();
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Cache-busting pour forcer une requête fraîche (Vercel, CDN, navigateur)
-    const url = `/api/leaderboard?_t=${Date.now()}`;
-    fetch(url, {
-      cache: 'no-store',
-      headers: { 'Cache-Control': 'no-cache', Pragma: 'no-cache' },
-    })
-      .then((res) => res.json())
-      .then((data) => setLeaderboard(data.leaderboard ?? []))
+  const refresh = useCallback((silent = false) => {
+    if (!silent) setLoading(true);
+    fetchLeaderboard()
+      .then(setLeaderboard)
       .catch(() => setLeaderboard([]))
-      .finally(() => setLoading(false));
+      .finally(() => { if (!silent) setLoading(false); });
   }, []);
+
+  // Chargement initial à l'arrivée sur la page
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  // Refetch quand l'utilisateur revient sur l'onglet (évite le cache stale)
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') refresh();
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange);
+  }, [refresh]);
+
+  // Rafraîchissement automatique toutes les minutes (en arrière-plan, sans spinner)
+  const POLL_INTERVAL_MS = 60 * 1000;
+  useEffect(() => {
+    const interval = setInterval(() => refresh(true), POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [refresh]);
 
   return (
     <div>
-      <h1 className="mb-2 text-3xl font-bold tracking-tight text-slate-100">
-        Classement
-      </h1>
-      <p className="mb-6 text-slate-400">
-        Classement des viewers selon le nombre de Pokémon capturés. Clique sur une ligne pour voir le profil du viewer.
-      </p>
+      <div className="mb-6">
+        <h1 className="mb-2 text-3xl font-bold tracking-tight text-slate-100">
+          Classement
+        </h1>
+        <p className="text-slate-400">
+          Classement des viewers selon le nombre de Pokémon capturés. Clique sur une ligne pour voir le profil du viewer.
+        </p>
+      </div>
 
       {loading ? (
         <div className="flex items-center gap-2 text-slate-400">
